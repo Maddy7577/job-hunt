@@ -1,0 +1,85 @@
+/* Drop zone */
+.drop-zone {
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  border-style: dashed !important;
+  border-color: #ced4da;
+  color: #6c757d;
+  font-size: 0.875rem;
+}
+.drop-zone:hover, .drop-zone.drag-over {
+  background: #e8f4fd;
+  border-color: #0d6efd !important;
+  color: #0d6efd;
+}
+
+/* Score badges */
+.badge-score-high  { background: #198754; color: #fff; }
+.badge-score-mid   { background: #fd7e14; color: #fff; }
+.badge-score-low   { background: #dc3545; color: #fff; }
+
+/* Portal badge */
+.portal-badge {
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 10px;
+  background: #e9ecef;
+  color: #495057;
+  white-space: nowrap;
+}
+
+/* Truncated description */
+.desc-excerpt {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+/* Portal progress bars */
+.portal-progress-item {
+  margin-bottom: 0.5rem;
+}
+.portal-progress-item .label {
+  font-size: 0.8rem;
+  width: 130px;
+  display: inline-block;
+}
+
+/* Score spinner placeholder */
+.score-loading {
+  width: 48px;
+  height: 20px;
+  background: linear-gradient(90deg, #e9ecef 25%, #dee2e6 50%, #e9ecef 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* History card */
+.history-card {
+  transition: box-shadow 0.15s;
+}
+.history-card:hover {
+  box-shadow: 0 0 0 2px #0d6efd44;
+}
+
+/* Tab content */
+.tab-content {
+  min-height: calc(100vh - 60px);
+}
+
+/* Sticky table header */
+#resultsTable thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}

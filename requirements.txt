@@ -1,0 +1,15 @@
+flask>=3.0
+flask-sqlalchemy>=3.1
+flask-cors>=4.0
+python-dotenv>=1.0
+pdfminer.six>=20221105
+python-docx>=1.1
+scikit-learn>=1.4
+sentence-transformers>=3.0
+gunicorn>=22.0
+
+# Uncomment when you're ready to use real job scraping:
+# apify-client>=1.7
+
+# Uncomment when you're ready to use Claude API scoring:
+# anthropic>=0.25

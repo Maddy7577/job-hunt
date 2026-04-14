@@ -1,0 +1,362 @@
+{
+  "linkedin": {
+    "actor_id": "curious_coder/linkedin-jobs-search",
+    "label": "LinkedIn",
+    "enabled": true,
+    "param_map": {
+      "experience": {
+        "internship": "1",
+        "entry": "2",
+        "mid": "3",
+        "senior": "4",
+        "lead": "5",
+        "executive": "6"
+      },
+      "date_posted": {
+        "any": "",
+        "day": "r86400",
+        "week": "r604800",
+        "month": "r2592000"
+      }
+    }
+  },
+  "indeed": {
+    "actor_id": "misceres/indeed-scraper",
+    "label": "Indeed",
+    "enabled": true,
+    "param_map": {
+      "experience": {
+        "internship": "internship",
+        "entry": "entry_level",
+        "mid": "mid_level",
+        "senior": "senior_level",
+        "lead": "senior_level",
+        "executive": "senior_level"
+      },
+      "date_posted": {
+        "any": "",
+        "day": "1",
+        "week": "7",
+        "month": "30"
+      }
+    }
+  },
+  "glassdoor": {
+    "actor_id": "bebity/glassdoor-jobs-scraper",
+    "label": "Glassdoor",
+    "enabled": true,
+    "param_map": {
+      "experience": {
+        "internship": "internship",
+        "entry": "entrylevel",
+        "mid": "midseniorlevel",
+        "senior": "midseniorlevel",
+        "lead": "director",
+        "executive": "executive"
+      },
+      "date_posted": {
+        "any": "",
+        "day": "1",
+        "week": "7",
+        "month": "30"
+      }
+    }
+  },
+  "ziprecruiter": {
+    "actor_id": "curious_coder/ziprecruiter-scraper",
+    "label": "ZipRecruiter",
+    "enabled": true,
+    "param_map": {
+      "experience": {
+        "internship": "internship",
+        "entry": "entry_level",
+        "mid": "mid_level",
+        "senior": "senior_level",
+        "lead": "senior_level",
+        "executive": "senior_level"
+      },
+      "date_posted": {
+        "any": "",
+        "day": "1",
+        "week": "7",
+        "month": "30"
+      }
+    }
+  },
+  "monster": {
+    "actor_id": "epctex/monster-scraper",
+    "label": "Monster",
+    "enabled": true,
+    "param_map": {
+      "experience": {
+        "internship": "internship",
+        "entry": "entry_level",
+        "mid": "mid_level",
+        "senior": "senior_level",
+        "lead": "senior_level",
+        "executive": "executive"
+      },
+      "date_posted": {
+        "any": "",
+        "day": "1",
+        "week": "7",
+        "month": "30"
+      }
+    }
+  },
+  "simplyhired": {
+    "actor_id": "epctex/simplyhired-scraper",
+    "label": "SimplyHired",
+    "enabled": true,
+    "param_map": {
+      "experience": {
+        "internship": "internship",
+        "entry": "entry_level",
+        "mid": "mid_level",
+        "senior": "senior_level",
+        "lead": "senior_level",
+        "executive": "executive"
+      },
+      "date_posted": {
+        "any": "",
+        "day": "1",
+        "week": "7",
+        "month": "30"
+      }
+    }
+  },
+  "careerbuilder": {
+    "actor_id": "epctex/careerbuilder-scraper",
+    "label": "CareerBuilder",
+    "enabled": true,
+    "param_map": {
+      "experience": {
+        "internship": "internship",
+        "entry": "entry_level",
+        "mid": "mid_level",
+        "senior": "senior_level",
+        "lead": "senior_level",
+        "executive": "executive"
+      },
+      "date_posted": {
+        "any": "",
+        "day": "1",
+        "week": "7",
+        "month": "30"
+      }
+    }
+  },
+  "dice": {
+    "actor_id": "epctex/dice-scraper",
+    "label": "Dice",
+    "enabled": true,
+    "param_map": {
+      "experience": {
+        "internship": "INTERN",
+        "entry": "JUNIOR",
+        "mid": "MIDLEVEL",
+        "senior": "SENIOR",
+        "lead": "LEAD",
+        "executive": "EXECUTIVE"
+      },
+      "date_posted": {
+        "any": "",
+        "day": "ONE",
+        "week": "SEVEN",
+        "month": "THIRTY"
+      }
+    }
+  },
+  "wellfound": {
+    "actor_id": "curious_coder/wellfound-scraper",
+    "label": "Wellfound",
+    "enabled": true,
+    "param_map": {
+      "experience": {
+        "internship": "internship",
+        "entry": "junior",
+        "mid": "mid",
+        "senior": "senior",
+        "lead": "lead",
+        "executive": "executive"
+      },
+      "date_posted": {
+        "any": "",
+        "day": "1",
+        "week": "7",
+        "month": "30"
+      }
+    }
+  },
+  "remoteok": {
+    "actor_id": "epctex/remoteok-scraper",
+    "label": "RemoteOK",
+    "enabled": true,
+    "param_map": {
+      "experience": {
+        "internship": "junior",
+        "entry": "junior",
+        "mid": "mid",
+        "senior": "senior",
+        "lead": "senior",
+        "executive": "senior"
+      },
+      "date_posted": {
+        "any": "",
+        "day": "1",
+        "week": "7",
+        "month": "30"
+      }
+    }
+  },
+  "weworkremotely": {
+    "actor_id": "epctex/weworkremotely-scraper",
+    "label": "We Work Remotely",
+    "enabled": true,
+    "param_map": {
+      "experience": {
+        "internship": "junior",
+        "entry": "junior",
+        "mid": "mid",
+        "senior": "senior",
+        "lead": "senior",
+        "executive": "senior"
+      },
+      "date_posted": {
+        "any": "",
+        "day": "1",
+        "week": "7",
+        "month": "30"
+      }
+    }
+  },
+  "greenhouse": {
+    "actor_id": "epctex/greenhouse-jobs-scraper",
+    "label": "Greenhouse",
+    "enabled": true,
+    "param_map": {
+      "experience": {
+        "internship": "internship",
+        "entry": "junior",
+        "mid": "mid",
+        "senior": "senior",
+        "lead": "lead",
+        "executive": "executive"
+      },
+      "date_posted": {
+        "any": "",
+        "day": "1",
+        "week": "7",
+        "month": "30"
+      }
+    }
+  },
+  "lever": {
+    "actor_id": "epctex/lever-jobs-scraper",
+    "label": "Lever",
+    "enabled": true,
+    "param_map": {
+      "experience": {
+        "internship": "internship",
+        "entry": "junior",
+        "mid": "mid",
+        "senior": "senior",
+        "lead": "lead",
+        "executive": "executive"
+      },
+      "date_posted": {
+        "any": "",
+        "day": "1",
+        "week": "7",
+        "month": "30"
+      }
+    }
+  },
+  "workday": {
+    "actor_id": "epctex/workday-jobs-scraper",
+    "label": "Workday",
+    "enabled": true,
+    "param_map": {
+      "experience": {
+        "internship": "internship",
+        "entry": "entry_level",
+        "mid": "experienced",
+        "senior": "experienced",
+        "lead": "manager",
+        "executive": "executive"
+      },
+      "date_posted": {
+        "any": "",
+        "day": "1",
+        "week": "7",
+        "month": "30"
+      }
+    }
+  },
+  "naukri": {
+    "actor_id": "curious_coder/naukri-scraper",
+    "label": "Naukri",
+    "enabled": true,
+    "geo": ["IN"],
+    "param_map": {
+      "experience": {
+        "internship": "0",
+        "entry": "1",
+        "mid": "3",
+        "senior": "6",
+        "lead": "10",
+        "executive": "15"
+      },
+      "date_posted": {
+        "any": "",
+        "day": "1",
+        "week": "7",
+        "month": "30"
+      }
+    }
+  },
+  "reed": {
+    "actor_id": "epctex/reed-scraper",
+    "label": "Reed",
+    "enabled": true,
+    "geo": ["GB"],
+    "param_map": {
+      "experience": {
+        "internship": "graduate",
+        "entry": "graduate",
+        "mid": "experienced",
+        "senior": "experienced",
+        "lead": "manager",
+        "executive": "director"
+      },
+      "date_posted": {
+        "any": "",
+        "day": "1",
+        "week": "7",
+        "month": "30"
+      }
+    }
+  },
+  "totaljobs": {
+    "actor_id": "epctex/totaljobs-scraper",
+    "label": "Totaljobs",
+    "enabled": true,
+    "geo": ["GB"],
+    "param_map": {
+      "experience": {
+        "internship": "graduate",
+        "entry": "graduate",
+        "mid": "experienced",
+        "senior": "experienced",
+        "lead": "manager",
+        "executive": "director"
+      },
+      "date_posted": {
+        "any": "",
+        "day": "1",
+        "week": "7",
+        "month": "30"
+      }
+    }
+  }
+}

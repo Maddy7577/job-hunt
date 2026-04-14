@@ -1,0 +1,94 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project
+
+Job Hunt is a Flask web application that fans out job searches across 17 portals via Apify actors, scores results against an uploaded resume, and presents a ranked table. See the full spec at `.claude/spec/job-hunt-app-spec.md`.
+
+## Running the app
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Start the dev server
+python run.py
+```
+
+The app is served at `http://localhost:5060`.
+
+## Environment
+
+Copy `.env.example` to `.env`. For local development no API keys are needed:
+
+```
+APIFY_MOCK=true          # uses fake job data — no Apify credits consumed
+FLASK_SECRET_KEY=any-string
+```
+
+When ready to enable real job scraping, set `APIFY_MOCK=false` and add:
+```
+APIFY_API_TOKEN=apify_api_xxxxxxxxxxxx
+```
+
+When ready to enable Claude-based scoring (paid), add:
+```
+ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxx
+```
+
+## Architecture
+
+```
+app/
+  __init__.py          # Flask app factory; registers blueprints, DB, CORS
+  models.py            # SQLAlchemy models: Resume, Search, Job
+  routes/
+    resume.py          # /api/resume  — upload, metadata, download
+    search.py          # /api/search  — start search, SSE progress stream, results
+    jobs.py            # /api/jobs, /api/saved, /api/history
+  services/
+    apify_service.py   # Mock mode (default) + real Apify actors (commented out)
+    scorer.py          # TF-IDF (instant) + sentence-transformers semantic score (async, free)
+    resume_parser.py   # Extracts plain text from PDF (pdfminer) or DOCX (python-docx)
+  static/
+    index.html / app.js / style.css   # Single-page UI
+config/
+  portals.json         # Actor slug + param_map per portal — edit here to add/remove portals
+uploads/               # Original resume files written at upload time
+```
+
+### Key design points
+
+**Mock mode (current default):** `apify_service.py` has `MOCK_MODE = True` (controlled by `APIFY_MOCK` env var). In mock mode, `run_actor()` calls `_mock_run_actor()` which returns realistic fake job listings without hitting the Apify API. The real Apify call is preserved in a commented-out block directly below. To switch to real scraping: set `APIFY_MOCK=false` in `.env` and uncomment the Apify block.
+
+**Portal configuration is data, not code.** `config/portals.json` holds each portal's Apify actor ID and a `param_map` that translates the app's canonical parameter values (e.g. `experience: "senior"`) into the vocabulary each portal expects. Adding a new portal means adding a JSON entry — no Python changes required.
+
+**Search lifecycle:** `POST /api/search` persists the search record (status `pending`), then hands off to a `ThreadPoolExecutor` (one thread per portal). Each thread calls the actor (mock or real), normalises results, deduplicates by `hash(company+title+location)`, and inserts `Job` rows. Status updates are pushed to the client via SSE on `GET /api/search/<id>/stream`.
+
+**Two-phase scoring:**
+1. TF-IDF cosine similarity runs synchronously on each `Job` row as it arrives → instant `fit_score`.
+2. A background thread runs `sentence-transformers` (`all-MiniLM-L6-v2`, free, local) → overwrites `fit_score` with a semantic score and populates `fit_rationale` with a keyword-based one-sentence explanation. The frontend polls `/api/jobs/<id>/score` and refreshes the badge in-place.
+3. *(Future)* Claude API scoring is preserved in a commented-out block in `scorer.py`. Uncomment and set `ANTHROPIC_API_KEY` to upgrade to AI rationale.
+
+**Resume storage:** Original binary is stored as a BLOB in `resume.file_data` and also written to `uploads/<timestamp>_<filename>`. `resume.raw_text` holds the extracted plain text used for scoring. All resume versions are kept; the latest is `SELECT … ORDER BY id DESC LIMIT 1`.
+
+## Database
+
+SQLite, managed via Flask-SQLAlchemy. Schema is in `app/models.py`. To reset:
+
+```bash
+flask shell
+>>> from app import db; db.drop_all(); db.create_all()
+```
+
+## Apify integration (when ready)
+
+Real actor calls are in `app/services/apify_service.py` in a commented-out block inside `run_actor()`. To enable:
+
+1. Set `APIFY_MOCK=false` in `.env`
+2. Set `APIFY_API_TOKEN=...` in `.env`
+3. Uncomment the Apify block in `run_actor()`
+4. Uncomment `apify-client>=1.7` in `requirements.txt` and `pip install -r requirements.txt`
+
+`maxItems` defaults to 50 (configurable per search via the UI slider).

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Job Hunt</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-dark bg-dark px-3">
+  <span class="navbar-brand fw-bold"><i class="bi bi-briefcase-fill me-2"></i>Job Hunt</span>
+  <ul class="nav nav-pills ms-auto" id="mainTabs">
+    <li class="nav-item"><a class="nav-link active" data-tab="search" href="#">Search</a></li>
+    <li class="nav-item"><a class="nav-link" data-tab="results" href="#">Results <span class="badge bg-secondary ms-1" id="resultsCount">0</span></a></li>
+    <li class="nav-item"><a class="nav-link" data-tab="saved" href="#">Saved <span class="badge bg-warning text-dark ms-1" id="savedCount">0</span></a></li>
+    <li class="nav-item"><a class="nav-link" data-tab="history" href="#">History</a></li>
+  </ul>
+</nav>
+
+<!-- SEARCH TAB -->
+<div id="tab-search" class="tab-content container-fluid py-4">
+  <div class="row g-4">
+
+    <!-- Search Form -->
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-header fw-semibold">Search Parameters</div>
+        <div class="card-body">
+
+          <!-- Roles -->
+          <div class="mb-3">
+            <label class="form-label">Role(s)</label>
+            <div id="rolesContainer" class="d-flex flex-wrap gap-2 mb-2"></div>
+            <div class="input-group">
+              <input type="text" id="roleInput" class="form-control" placeholder="e.g. Backend Engineer" />
+              <button class="btn btn-outline-secondary" id="addRoleBtn"><i class="bi bi-plus"></i> Add</button>
+            </div>
+          </div>
+
+          <!-- Location + Remote -->
+          <div class="row mb-3">
+            <div class="col-sm-8">
+              <label class="form-label">Location</label>
+              <input type="text" id="location" class="form-control" placeholder="City, State or Country" />
+            </div>
+            <div class="col-sm-4 d-flex align-items-end">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="remoteOnly" />
+                <label class="form-check-label" for="remoteOnly">Remote only</label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Country + Experience -->
+          <div class="row mb-3">
+            <div class="col-sm-6">
+              <label class="form-label">Country</label>
+              <select id="country" class="form-select">
+                <option value="US">United States</option>
+                <option value="GB">United Kingdom</option>
+                <option value="IN">India</option>
+                <option value="CA">Canada</option>
+                <option value="AU">Australia</option>
+                <option value="DE">Germany</option>
+                <option value="FR">France</option>
+                <option value="">Any</option>
+              </select>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label">Experience Level</label>
+              <select id="experience" class="form-select">
+                <option value="">Any</option>
+                <option value="internship">Internship</option>
+                <option value="entry">Entry Level (0–2 yrs)</option>
+                <option value="mid">Mid Level (2–5 yrs)</option>
+                <option value="senior" selected>Senior (5–8 yrs)</option>
+                <option value="lead">Lead / Principal (8+ yrs)</option>
+                <option value="executive">Executive / C-Suite</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Employment Type -->
+          <div class="mb-3">
+            <label class="form-label">Employment Type</label>
+            <div class="d-flex flex-wrap gap-3">
+              <div class="form-check"><input class="form-check-input emp-type" type="checkbox" value="full_time" id="empFull" checked /><label class="form-check-label" for="empFull">Full-time</label></div>
+              <div class="form-check"><input class="form-check-input emp-type" type="checkbox" value="contract" id="empContract" checked /><label class="form-check-label" for="empContract">Contract</label></div>
+              <div class="form-check"><input class="form-check-input emp-type" type="checkbox" value="part_time" id="empPart" /><label class="form-check-label" for="empPart">Part-time</label></div>
+              <div class="form-check"><input class="form-check-input emp-type" type="checkbox" value="internship" id="empIntern" /><label class="form-check-label" for="empIntern">Internship</label></div>
+            </div>
+          </div>
+
+          <!-- Date Posted + Salary -->
+          <div class="row mb-3">
+            <div class="col-sm-4">
+              <label class="form-label">Date Posted</label>
+              <select id="datePosted" class="form-select">
+                <option value="any">Any time</option>
+                <option value="day">Last 24 hours</option>
+                <option value="week" selected>Last 7 days</option>
+                <option value="month">Last 30 days</option>
+              </select>
+            </div>
+            <div class="col-sm-4">
+              <label class="form-label">Min Salary (optional)</label>
+              <input type="number" id="salaryMin" class="form-control" placeholder="e.g. 120000" />
+            </div>
+            <div class="col-sm-4">
+              <label class="form-label">Currency</label>
+              <select id="salaryCurrency" class="form-select">
+                <option value="USD">USD</option>
+                <option value="GBP">GBP</option>
+                <option value="EUR">EUR</option>
+                <option value="INR">INR</option>
+                <option value="CAD">CAD</option>
+                <option value="AUD">AUD</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Max Results -->
+          <div class="mb-3">
+            <label class="form-label">Max results per portal: <strong id="maxResultsLabel">50</strong></label>
+            <input type="range" id="maxResults" class="form-range" min="5" max="200" step="5" value="50" />
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column: Resume + Portals + Find -->
+    <div class="col-lg-4">
+
+      <!-- Resume card -->
+      <div class="card shadow-sm mb-3">
+        <div class="card-header fw-semibold">Resume</div>
+        <div class="card-body">
+          <div id="resumeStatus" class="text-muted mb-2">No resume uploaded</div>
+          <div id="dropZone" class="drop-zone mb-2 text-center p-3 rounded border border-dashed">
+            <i class="bi bi-cloud-upload fs-3 d-block mb-1"></i>
+            Drop PDF / DOCX here, or click to browse
+            <input type="file" id="resumeFile" accept=".pdf,.docx" class="visually-hidden" />
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-primary" id="replaceResumeBtn"><i class="bi bi-arrow-repeat"></i> Replace</button>
+            <button class="btn btn-sm btn-outline-secondary" id="downloadResumeBtn" disabled><i class="bi bi-download"></i> Download</button>
+          </div>
+          <div id="uploadProgress" class="progress mt-2 d-none" style="height:4px">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" style="width:100%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Portals card -->
+      <div class="card shadow-sm mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center fw-semibold">
+          Portals
+          <div>
+            <a href="#" id="selectAllPortals" class="small me-2">All</a>
+            <a href="#" id="deselectAllPortals" class="small">None</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div id="portalCheckboxes" class="d-flex flex-wrap gap-2"></div>
+        </div>
+      </div>
+
+      <!-- Find button -->
+      <button class="btn btn-primary btn-lg w-100" id="findBtn" disabled>
+        <i class="bi bi-search me-2"></i>Find Jobs
+      </button>
+    </div>
+  </div>
+
+  <!-- Progress section (shown during search) -->
+  <div id="progressSection" class="mt-4 d-none">
+    <h6 class="fw-semibold mb-3">Search Progress</h6>
+    <div id="portalProgressBars"></div>
+  </div>
+</div>
+
+<!-- RESULTS TAB -->
+<div id="tab-results" class="tab-content container-fluid py-4 d-none">
+
+  <!-- Filters -->
+  <div class="d-flex flex-wrap gap-2 mb-3 align-items-center">
+    <select id="filterPortal" class="form-select form-select-sm w-auto">
+      <option value="">All portals</option>
+    </select>
+    <select id="filterExperience" class="form-select form-select-sm w-auto">
+      <option value="">All experience</option>
+      <option value="internship">Internship</option>
+      <option value="entry">Entry</option>
+      <option value="mid">Mid</option>
+      <option value="senior">Senior</option>
+      <option value="lead">Lead</option>
+      <option value="executive">Executive</option>
+    </select>
+    <select id="sortBy" class="form-select form-select-sm w-auto">
+      <option value="fit_score">Sort: Fit Score</option>
+      <option value="company">Sort: Company</option>
+      <option value="posted_at">Sort: Date Posted</option>
+    </select>
+    <span class="ms-auto text-muted small" id="resultsSummary"></span>
+  </div>
+
+  <!-- Table -->
+  <div class="table-responsive">
+    <table class="table table-hover align-middle" id="resultsTable">
+      <thead class="table-dark">
+        <tr>
+          <th>#</th>
+          <th>Company</th>
+          <th>Role</th>
+          <th>Experience</th>
+          <th>Fit Score</th>
+          <th>Description</th>
+          <th>Apply</th>
+          <th><i class="bi bi-star"></i></th>
+        </tr>
+      </thead>
+      <tbody id="resultsBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="d-flex justify-content-between align-items-center mt-3">
+    <button class="btn btn-outline-secondary btn-sm" id="prevPage" disabled>&#8592; Prev</button>
+    <span id="pageInfo" class="text-muted small"></span>
+    <button class="btn btn-outline-secondary btn-sm" id="nextPage" disabled>Next &#8594;</button>
+  </div>
+</div>
+
+<!-- SAVED TAB -->
+<div id="tab-saved" class="tab-content container-fluid py-4 d-none">
+  <h5 class="mb-3">Saved Jobs</h5>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>Company</th><th>Role</th><th>Portal</th><th>Fit Score</th><th>Apply</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="savedBody"></tbody>
+    </table>
+  </div>
+  <p id="savedEmpty" class="text-muted d-none">No saved jobs yet.</p>
+</div>
+
+<!-- HISTORY TAB -->
+<div id="tab-history" class="tab-content container-fluid py-4 d-none">
+  <h5 class="mb-3">Search History</h5>
+  <div id="historyList"></div>
+  <p id="historyEmpty" class="text-muted d-none">No searches yet.</p>
+</div>
+
+<!-- JD Modal -->
+<div class="modal fade" id="jdModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="jdModalTitle">Job Description</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="jdModalBody"></div>
+      <div class="modal-footer">
+        <a id="jdModalApply" href="#" target="_blank" class="btn btn-primary">Apply <i class="bi bi-box-arrow-up-right"></i></a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>
