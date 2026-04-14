@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Job Hunt is a Flask web application that fans out job searches across 17 portals via Apify actors, scores results against an uploaded resume, and presents a ranked table. See the full spec at `.claude/spec/job-hunt-app-spec.md`.
+Job Hunt is a Flask web application that fans out job searches across 17 portals via Apify actors, scores results against an uploaded resume, and presents a ranked table. See the full spec at `.claude/specs/job-hunt-app-spec.md`.
 
 ## Running the app
 
@@ -16,7 +16,7 @@ pip install -r requirements.txt
 python run.py
 ```
 
-The app is served at `http://localhost:5060`.
+The app is served at `http://localhost:5100`.
 
 ## Environment
 
@@ -92,3 +92,25 @@ Real actor calls are in `app/services/apify_service.py` in a commented-out block
 4. Uncomment `apify-client>=1.7` in `requirements.txt` and `pip install -r requirements.txt`
 
 `maxItems` defaults to 50 (configurable per search via the UI slider).
+
+## Feature Development Workflow
+
+New features follow an ideation-first, spec-driven process:
+
+1. **Describe** the feature to Claude Code in plain language.
+2. **Claude distills** the requirement into a clear, workable prompt and saves it to `.claude/ideation/feature-idea.md`.
+3. **Claude notifies** you: _"feature-idea.md updated with the requirement"_.
+4. **Review** the prompt in `feature-idea.md` and adjust if needed.
+5. **Run `/feature-create-spec <step> <feature-name>`** — Claude reads `feature-idea.md`, generates a detailed spec saved to `.claude/specs/<step>-<feature-slug>.md`, and archives the idea prompt as `.claude/ideation/feature-idea-<feature-slug>.md`.
+6. **Review the spec**, then enter Plan mode (Shift+Tab twice) to begin implementation.
+
+### .claude folder structure
+
+```
+.claude/
+  specs/       # App specification + per-feature spec files
+  commands/    # Custom Claude Code slash commands (.md files)
+  ideation/    # feature-idea.md (active) + feature-idea-<slug>.md (archived per feature)
+```
+
+`feature-idea.md` is a reusable single file — it is overwritten with each new feature idea. A dated archive copy (`feature-idea-<slug>.md`) is saved automatically by `/feature-create-spec`.

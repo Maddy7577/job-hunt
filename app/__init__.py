@@ -28,10 +28,12 @@ def create_app():
     from app.routes.resume import resume_bp
     from app.routes.search import search_bp
     from app.routes.jobs import jobs_bp
+    from app.routes.autohunt import autohunt_bp
 
     app.register_blueprint(resume_bp)
     app.register_blueprint(search_bp)
     app.register_blueprint(jobs_bp)
+    app.register_blueprint(autohunt_bp)
 
     with app.app_context():
         db.create_all()
