@@ -83,3 +83,6 @@
   top: 0;
   z-index: 1;
 }
+
+/* AutoHunt */
+#tab-autohunt .text-muted.small { font-size: 0.82rem; }

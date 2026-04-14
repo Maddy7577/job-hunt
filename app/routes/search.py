@@ -187,8 +187,13 @@ def results(search_id):
     elif sort == "posted_at":
         sort_col = Job.posted_at.desc()
 
+    exclude_filtered = request.args.get("exclude_filtered", "1") == "1"
+    query = Job.query.filter_by(search_id=search_id)
+    if exclude_filtered:
+        query = query.filter(Job.autohunt_filtered == 0)
+
     pagination = (
-        Job.query.filter_by(search_id=search_id)
+        query
         .order_by(sort_col)
         .paginate(page=page, per_page=per_page, error_out=False)
     )

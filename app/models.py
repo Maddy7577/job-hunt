@@ -2,6 +2,7 @@ from datetime import datetime
 from app import db
 
 
+
 class Resume(db.Model):
     __tablename__ = "resume"
 
@@ -84,7 +85,8 @@ class Job(db.Model):
     fit_score = db.Column(db.Float)
     fit_rationale = db.Column(db.Text)
     saved = db.Column(db.Integer, default=0)
-    dedup_key = db.Column(db.Text)
+    dedup_key           = db.Column(db.Text)
+    autohunt_filtered   = db.Column(db.Integer, default=0)
 
     __table_args__ = (
         db.Index("idx_job_search", "search_id"),
@@ -111,4 +113,13 @@ class Job(db.Model):
             "fit_rationale": self.fit_rationale,
             "saved": bool(self.saved),
             "dedup_key": self.dedup_key,
+            "autohunt_filtered": bool(self.autohunt_filtered),
         }
+
+
+class AutoHuntProfile(db.Model):
+    __tablename__ = "autohunt_profile"
+
+    id         = db.Column(db.Integer, primary_key=True)
+    skills     = db.Column(db.Text, nullable=False)          # JSON array
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
