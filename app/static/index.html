@@ -18,6 +18,7 @@
     <li class="nav-item"><a class="nav-link" data-tab="results" href="#">Results <span class="badge bg-secondary ms-1" id="resultsCount">0</span></a></li>
     <li class="nav-item"><a class="nav-link" data-tab="saved" href="#">Saved <span class="badge bg-warning text-dark ms-1" id="savedCount">0</span></a></li>
     <li class="nav-item"><a class="nav-link" data-tab="history" href="#">History</a></li>
+    <li class="nav-item"><a class="nav-link" data-tab="autohunt" href="#">AutoHunt</a></li>
   </ul>
 </nav>
 
@@ -257,6 +258,61 @@
   <h5 class="mb-3">Search History</h5>
   <div id="historyList"></div>
   <p id="historyEmpty" class="text-muted d-none">No searches yet.</p>
+</div>
+
+<!-- AUTOHUNT TAB -->
+<div id="tab-autohunt" class="tab-content container-fluid py-4 d-none">
+  <div class="card shadow-sm p-4 mb-4">
+    <h5 class="fw-semibold mb-3">AutoHunt — Personal Hunt</h5>
+
+    <label class="form-label fw-medium">Skills</label>
+    <div id="ahSkillsContainer" class="d-flex flex-wrap gap-2 mb-2"></div>
+    <div class="input-group mb-3">
+      <input type="text" id="ahSkillInput" class="form-control" placeholder="Add a skill…" />
+      <button class="btn btn-outline-secondary" id="ahAddSkillBtn"><i class="bi bi-plus"></i> Add</button>
+    </div>
+
+    <p class="text-muted small mb-3">
+      📍 Pune, India &nbsp;·&nbsp; 11+ yrs &nbsp;·&nbsp;
+      Open to world &nbsp;·&nbsp; English-only &nbsp;·&nbsp; Visa-friendly
+    </p>
+
+    <button id="ahHuntBtn" class="btn btn-primary px-5">
+      <i class="bi bi-search me-2"></i>HUNT
+    </button>
+  </div>
+
+  <!-- Progress -->
+  <div id="ahProgress" class="d-none mb-4">
+    <h6 class="fw-semibold mb-3">Hunt Progress</h6>
+    <div id="ahPortalProgressBars"></div>
+  </div>
+
+  <!-- Results -->
+  <div id="ahResultsSection" class="d-none">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <span id="ahResultsSummary" class="text-muted small"></span>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>Company</th>
+            <th>Role</th>
+            <th>Experience</th>
+            <th>Job Description</th>
+            <th>Apply</th>
+          </tr>
+        </thead>
+        <tbody id="ahResultsBody"></tbody>
+      </table>
+    </div>
+    <div class="d-flex justify-content-between align-items-center mt-2">
+      <button id="ahPrevBtn" class="btn btn-outline-secondary btn-sm" disabled>&#8592; Prev</button>
+      <span id="ahPageInfo" class="text-muted small"></span>
+      <button id="ahNextBtn" class="btn btn-outline-secondary btn-sm" disabled>Next &#8594;</button>
+    </div>
+  </div>
 </div>
 
 <!-- JD Modal -->
