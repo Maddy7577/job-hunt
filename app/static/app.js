@@ -49,7 +49,7 @@ function switchTab(name) {
 
   if (name === "saved") loadSaved();
   if (name === "history") loadHistory();
-  if (name === "autohunt") ahLoadProfile();
+  if (name === "autohunt") { ahLoadProfile(); ahLoadEmailConfig(); }
 }
 
 // ── Roles tag input ───────────────────────────────────────────────────
@@ -507,7 +507,7 @@ function prefillSearch(s) {
 }
 
 // ── AutoHunt module ───────────────────────────────────────────────────────────
-const ahState = { skills: [], searchId: null, currentPage: 1, totalPages: 1 };
+const ahState = { skills: [], searchId: null, currentPage: 1, totalPages: 1, digestTotal: 0 };
 
 function ahRenderSkills() {
   const c = $("ahSkillsContainer");
@@ -598,6 +598,7 @@ function ahOpenSSE(searchId) {
       $("ahHuntBtn").disabled = false;
       $("ahResultsSection").classList.remove("d-none");
       ahLoadPage(1);
+      if (d.total > 0) $("ahDigestBtn").disabled = false;
     }
   });
 
@@ -705,6 +706,88 @@ $("ahSkillInput").addEventListener("keydown", e => { if (e.key === "Enter") { e.
 $("ahHuntBtn").addEventListener("click", ahStartHunt);
 $("ahPrevBtn").addEventListener("click", () => ahLoadPage(ahState.currentPage - 1));
 $("ahNextBtn").addEventListener("click", () => ahLoadPage(ahState.currentPage + 1));
+$("ahDigestBtn").addEventListener("click", ahSendDigest);
+
+// ── AutoHunt digest ───────────────────────────────────────────────────────────
+
+async function ahLoadEmailConfig() {
+  try {
+    const res = await fetch("/api/autohunt/email-config");
+    const d = await res.json();
+    const el = $("digestEmailConfig");
+    if (!d.configured) {
+      el.innerHTML = `<span class="text-warning">
+        &#9888; Set GMAIL_ADDRESS, GMAIL_APP_PASSWORD, and GEMINI_API_KEY in .env to enable Send Digest.
+      </span>`;
+      $("ahDigestBtn").title = "Configure email settings in .env first";
+    } else {
+      el.innerHTML = `Sending from: <strong>${escHtml(d.gmail_address)}</strong> &rarr; <strong>${escHtml(d.notify_email)}</strong>`;
+    }
+  } catch (_) {}
+}
+
+async function ahSendDigest() {
+  $("ahDigestBtn").disabled = true;
+  $("digestProgress").classList.remove("d-none");
+  $("digestProgressBar").style.width = "0%";
+  $("digestProgressLabel").textContent = "Starting\u2026";
+  $("digestProgressCount").textContent = "";
+
+  try {
+    const res = await fetch(`/api/autohunt/${ahState.searchId}/digest`, { method: "POST" });
+    const d = await res.json();
+
+    if (!res.ok) {
+      showToast(d.error || "Failed to start digest", "danger");
+      $("ahDigestBtn").disabled = false;
+      $("digestProgress").classList.add("d-none");
+      return;
+    }
+    if (d.status === "nothing_to_send") {
+      showToast("All jobs already sent \u2014 no new emails.", "info");
+      $("digestProgress").classList.add("d-none");
+      $("ahDigestBtn").disabled = false;
+      return;
+    }
+    ahState.digestTotal = d.total;
+    ahOpenDigestStream(ahState.searchId);
+  } catch (err) {
+    showToast(err.message || "Digest request failed", "danger");
+    $("ahDigestBtn").disabled = false;
+    $("digestProgress").classList.add("d-none");
+  }
+}
+
+function ahOpenDigestStream(searchId) {
+  const src = new EventSource(`/api/autohunt/${searchId}/digest/stream`);
+
+  src.addEventListener("digest_progress", e => {
+    const d = JSON.parse(e.data);
+    const pct = d.total > 0 ? Math.round((d.sent / d.total) * 100) : 0;
+    $("digestProgressBar").style.width = pct + "%";
+    $("digestProgressLabel").textContent =
+      `Sending ${d.sent} / ${d.total} \u2014 ${escHtml(d.current_company)}`;
+    $("digestProgressCount").textContent = pct + "%";
+  });
+
+  src.addEventListener("digest_done", e => {
+    const d = JSON.parse(e.data);
+    src.close();
+    $("digestProgress").classList.add("d-none");
+    $("ahDigestBtn").disabled = false;
+    const msg = d.errors > 0
+      ? `Digest sent \u2014 ${d.sent} emails, ${d.errors} error(s)`
+      : `Digest sent \u2014 ${d.sent} emails dispatched`;
+    showToast(msg, d.errors > 0 ? "warning" : "success");
+  });
+
+  src.addEventListener("error", () => {
+    src.close();
+    $("digestProgress").classList.add("d-none");
+    $("ahDigestBtn").disabled = false;
+    showToast("Digest stream error", "danger");
+  });
+}
 
 // ── XSS helpers ───────────────────────────────────────────────────────
 function escHtml(str) {

@@ -123,3 +123,21 @@ class AutoHuntProfile(db.Model):
     id         = db.Column(db.Integer, primary_key=True)
     skills     = db.Column(db.Text, nullable=False)          # JSON array
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class JobDigestStatus(db.Model):
+    """Tracks email notification status per job. One row per job."""
+    __tablename__ = "job_digest_status"
+
+    job_id      = db.Column(db.Integer, db.ForeignKey("job.id"), primary_key=True)
+    status      = db.Column(db.Text, nullable=False, default="New")   # "New" | "Notified"
+    notified_at = db.Column(db.DateTime, nullable=True)
+
+    job = db.relationship("Job", backref=db.backref("digest_status", uselist=False))
+
+    def to_dict(self):
+        return {
+            "job_id": self.job_id,
+            "status": self.status,
+            "notified_at": self.notified_at.isoformat() if self.notified_at else None,
+        }

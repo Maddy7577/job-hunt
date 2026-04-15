@@ -37,20 +37,31 @@ When ready to enable Claude-based scoring (paid), add:
 ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxx
 ```
 
+When ready to enable the AutoHunt Gmail Digest (free), add:
+```
+GMAIL_ADDRESS=you@gmail.com
+GMAIL_APP_PASSWORD=xxxx-xxxx-xxxx-xxxx   # Google App Password (myaccount.google.com/apppasswords)
+GEMINI_API_KEY=AIza...                   # Google AI Studio free tier (aistudio.google.com)
+NOTIFY_EMAIL=you@gmail.com               # Recipient (defaults to GMAIL_ADDRESS if unset)
+```
+
 ## Architecture
 
 ```
 app/
   __init__.py          # Flask app factory; registers blueprints, DB, CORS
-  models.py            # SQLAlchemy models: Resume, Search, Job
+  models.py            # SQLAlchemy models: Resume, Search, Job, AutoHuntProfile, JobDigestStatus
   routes/
     resume.py          # /api/resume  — upload, metadata, download
     search.py          # /api/search  — start search, SSE progress stream, results
     jobs.py            # /api/jobs, /api/saved, /api/history
+    autohunt.py        # /api/autohunt — profile, hunt, digest, email-config
   services/
     apify_service.py   # Mock mode (default) + real Apify actors (commented out)
     scorer.py          # TF-IDF (instant) + sentence-transformers semantic score (async, free)
     resume_parser.py   # Extracts plain text from PDF (pdfminer) or DOCX (python-docx)
+    autohunt_filter.py # Language + visa/residency post-fetch filters for AutoHunt
+    digest_service.py  # Gemini ATS resume tailoring + fpdf2 PDF + Gmail SMTP send
   static/
     index.html / app.js / style.css   # Single-page UI
 config/
@@ -73,9 +84,23 @@ uploads/               # Original resume files written at upload time
 
 **Resume storage:** Original binary is stored as a BLOB in `resume.file_data` and also written to `uploads/<timestamp>_<filename>`. `resume.raw_text` holds the extracted plain text used for scoring. All resume versions are kept; the latest is `SELECT … ORDER BY id DESC LIMIT 1`.
 
+**AutoHunt:** A dedicated tab pre-configured for the user's profile (Pune, India; 11+ yrs; open to world). One click fans out a search across all portals. Post-fetch filters in `autohunt_filter.py` drop non-English-language and no-visa-sponsorship listings before they are saved.
+
+**AutoHunt Gmail Digest:** After a hunt, the **Send Digest** button dispatches one Gmail per job result. `digest_service.py` calls Gemini 1.5 Flash (free tier) to rewrite the user's resume as an ATS-optimised PDF for that specific role, then sends it as an attachment via Gmail SMTP. Notification state is tracked in `JobDigestStatus` (`job_id`, `status`: `"New"` → `"Notified"`, `notified_at`). A job with `status = "Notified"` is never emailed again. Gemini calls are rate-limited to 15 RPM (4 s sleep between calls) to stay within the free tier.
+
 ## Database
 
-SQLite, managed via Flask-SQLAlchemy. Schema is in `app/models.py`. To reset:
+SQLite, managed via Flask-SQLAlchemy. Schema is in `app/models.py`.
+
+| Table | Purpose |
+|---|---|
+| `resume` | Uploaded resume files (binary + extracted text) |
+| `search` | Each search run (params + status) |
+| `job` | Individual job listings linked to a search |
+| `autohunt_profile` | Persisted AutoHunt skills list (single row, id=1) |
+| `job_digest_status` | Per-job email notification state (`job_id`, `status`, `notified_at`) |
+
+To reset (required after schema changes — SQLite does not auto-add columns):
 
 ```bash
 flask shell
