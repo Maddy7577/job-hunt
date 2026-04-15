@@ -16,7 +16,7 @@ cp .env.example .env
 python run.py
 ```
 
-App is served at `http://localhost:5060`.
+App is served at `http://localhost:5100`.
 
 ## Features
 
@@ -25,6 +25,8 @@ App is served at `http://localhost:5060`.
 - Two-phase scoring: instant TF-IDF + async semantic scoring (sentence-transformers, free & local)
 - Save and track jobs; view search history
 - Mock mode for development — no Apify credits consumed
+- **AutoHunt** — one-click personalised job search pre-configured with your profile; filters out non-English and no-visa-sponsorship roles automatically
+- **Gmail Digest** — after a hunt, sends one email per job with a tailored PDF resume attached; Gemini 1.5 Flash rewrites your resume as an ATS-optimised match for each role (all free)
 
 ## Environment Variables
 
@@ -34,15 +36,19 @@ App is served at `http://localhost:5060`.
 | `APIFY_MOCK` | No | `true` (default) — use fake data; `false` — real scraping |
 | `APIFY_API_TOKEN` | When mock=false | Apify API token |
 | `ANTHROPIC_API_KEY` | No | Enables Claude-based scoring (paid) |
+| `GMAIL_ADDRESS` | For digest | Gmail account to send from |
+| `GMAIL_APP_PASSWORD` | For digest | Google App Password ([create one](https://myaccount.google.com/apppasswords)) |
+| `GEMINI_API_KEY` | For digest | Google AI Studio free-tier key ([get one](https://aistudio.google.com/app/apikey)) |
+| `NOTIFY_EMAIL` | No | Digest recipient — defaults to `GMAIL_ADDRESS` |
 
 ## Project Structure
 
 ```
 app/
   __init__.py          # Flask app factory
-  models.py            # SQLAlchemy models: Resume, Search, Job
-  routes/              # API blueprints (resume, search, jobs)
-  services/            # apify_service, scorer, resume_parser
+  models.py            # SQLAlchemy models: Resume, Search, Job, AutoHuntProfile, JobDigestStatus
+  routes/              # API blueprints (resume, search, jobs, autohunt)
+  services/            # apify_service, scorer, resume_parser, autohunt_filter, digest_service
   static/              # index.html, app.js, style.css (SPA)
 config/
   portals.json         # Portal config — add/remove portals here
@@ -50,6 +56,7 @@ config/
   specs/               # App specification + per-feature spec files
   commands/            # Custom Claude Code slash commands
   ideation/            # Feature ideation prompts
+  plans/               # Implementation plans per feature
 ```
 
 See `CLAUDE.md` for full architecture details and the feature development workflow.

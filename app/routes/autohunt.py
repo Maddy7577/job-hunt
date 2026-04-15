@@ -1,17 +1,34 @@
 import json
+import os
+import queue as _queue
 import threading
 from datetime import datetime
 
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify, current_app, Response, stream_with_context
 
 from app import db
-from app.models import AutoHuntProfile, Resume, Search, Job
+from app.models import AutoHuntProfile, Resume, Search, Job, JobDigestStatus
 from app.services.apify_service import run_search, load_portals_config
 from app.services.scorer import tfidf_score, semantic_score_async
 from app.services.autohunt_filter import should_include
 from app.routes.search import _push
 
 autohunt_bp = Blueprint("autohunt", __name__)
+
+# ── Digest SSE queues (separate from hunt SSE in search.py) ──────────────────
+_digest_queues: dict[int, _queue.Queue] = {}
+_digest_lock = threading.Lock()
+
+
+def _digest_get_queue(search_id: int) -> _queue.Queue:
+    with _digest_lock:
+        if search_id not in _digest_queues:
+            _digest_queues[search_id] = _queue.Queue()
+        return _digest_queues[search_id]
+
+
+def _digest_push(search_id: int, event: str, data: dict) -> None:
+    _digest_get_queue(search_id).put({"event": event, "data": data})
 
 # ── Fixed profile constants ───────────────────────────────────────────────────
 _AUTOHUNT_LOCATION  = "Pune, India"
@@ -189,3 +206,78 @@ def _execute_autohunt(search_id: int, resume_id: int, portals: list, params: dic
 
         _push(search_id, "status", {"status": "done", "total": kept})
         _push(search_id, "__done__", {})
+
+
+# ── POST /api/autohunt/<search_id>/digest ─────────────────────────────────────
+@autohunt_bp.route("/api/autohunt/<int:search_id>/digest", methods=["POST"])
+def start_digest(search_id):
+    if not os.getenv("GEMINI_API_KEY"):
+        return jsonify({"error": "GEMINI_API_KEY not configured"}), 503
+    if not os.getenv("GMAIL_APP_PASSWORD"):
+        return jsonify({"error": "GMAIL_APP_PASSWORD not configured"}), 503
+
+    notified_ids = [
+        row.job_id for row in
+        JobDigestStatus.query.filter_by(status="Notified").all()
+    ]
+    base_q = Job.query.filter_by(search_id=search_id, autohunt_filtered=0)
+    if notified_ids:
+        base_q = base_q.filter(Job.id.notin_(notified_ids))
+    count = base_q.count()
+    if count == 0:
+        return jsonify({"status": "nothing_to_send", "total": 0}), 200
+
+    _digest_get_queue(search_id)          # pre-create queue before thread starts
+    app = current_app._get_current_object()
+    threading.Thread(
+        target=_run_digest, args=(search_id, app), daemon=True
+    ).start()
+    return jsonify({"status": "started", "total": count}), 202
+
+
+def _run_digest(search_id: int, app) -> None:
+    from app.services.digest_service import send_digest
+    send_digest(search_id, app, _digest_push)
+
+
+# ── GET /api/autohunt/<search_id>/digest/stream ───────────────────────────────
+@autohunt_bp.route("/api/autohunt/<int:search_id>/digest/stream")
+def digest_stream(search_id):
+    q = _digest_get_queue(search_id)
+
+    @stream_with_context
+    def generate():
+        while True:
+            try:
+                item = q.get(timeout=30)
+            except _queue.Empty:
+                yield "event: ping\ndata: {}\n\n"
+                continue
+            event = item["event"]
+            yield f"event: {event}\ndata: {json.dumps(item['data'])}\n\n"
+            if event == "__digest_done__":
+                break
+
+    return Response(
+        generate(),
+        mimetype="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
+
+# ── GET /api/autohunt/email-config ────────────────────────────────────────────
+@autohunt_bp.route("/api/autohunt/email-config")
+def email_config():
+    gmail = os.getenv("GMAIL_ADDRESS", "")
+    notify = os.getenv("NOTIFY_EMAIL") or gmail
+    configured = bool(
+        gmail
+        and os.getenv("GMAIL_APP_PASSWORD")
+        and os.getenv("GEMINI_API_KEY")
+    )
+    # GMAIL_APP_PASSWORD is intentionally not returned
+    return jsonify({
+        "gmail_address": gmail,
+        "notify_email": notify,
+        "configured": configured,
+    })
